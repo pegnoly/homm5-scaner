@@ -1,6 +1,6 @@
 [package]
 name = "homm5-scaner"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "This crate is used for lua scripts generation from homm5 files"
 license = "MIT"
@@ -16,3 +16,4 @@ strum_macros = "0.25.2"
 utf16_reader = "0.1.0"
 zip = "0.6.6"
 homm5-types = "0.1.0"
+serde_json = "1.0.111"

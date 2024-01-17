@@ -1,9 +1,9 @@
-use super::{Scan, ToLua, FileStructure, CollectFiles, FileObjects, configure_path};
+use super::{configure_path, CollectFiles, FileObjects, FileStructure, Output, Scan};
 use quick_xml::{Reader, events::Event};
 use std::collections::HashMap;
 use homm5_types::{common::FileRef, spell::SpellShared};
 
-impl ToLua for SpellShared {
+impl Output for SpellShared {
     type ID = u16;
     fn to_lua(&self, id: Option<Self::ID>) -> String {
         let is_aimed = if self.IsAimed == true {"1"} else {"nil"};
@@ -27,6 +27,10 @@ impl ToLua for SpellShared {
             is_aimed,
             is_area
         )
+    }
+
+    fn to_json(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
     }
 }
 
@@ -97,7 +101,7 @@ pub struct SpellScaner {
 }
 
 impl Scan<u16> for SpellScaner {
-    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn ToLua<ID = u16>>> {
+    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn Output<ID = u16>>> {
         let mut buf = Vec::new();
         let mut reader = Reader::from_str(entity);
         reader.trim_text(true);

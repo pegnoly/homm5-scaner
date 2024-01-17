@@ -1,4 +1,4 @@
-use super::{FileRef, Scan, ToLua, configure_path, FileStructure, CollectFiles, FileObjects};
+use super::{configure_path, CollectFiles, FileObjects, FileRef, FileStructure, Output, Scan};
 use quick_xml::{Reader, events::Event};
 use std::collections::HashMap;
 use homm5_types::creature::{CreatureVisual, AdvMapCreatureShared};
@@ -60,7 +60,10 @@ impl CollectFiles for CreatureFileCollector {
     }
 }
 
-impl ToLua for AdvMapCreatureShared {
+// impl ToJson for AdvMapCreatureShared {
+// }
+
+impl Output for AdvMapCreatureShared {
     type ID = u16;
     fn to_lua(&self, id: Option<u16>) -> String {
         let is_generatable = if self.SubjectOfRandomGeneration == true {"1"} else {"nil"};
@@ -143,6 +146,10 @@ impl ToLua for AdvMapCreatureShared {
             is_upgrade
         )
     }
+
+    fn to_json(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
+    }
 }
 
 pub struct CreatureScaner {
@@ -199,7 +206,7 @@ impl CreatureScaner {
 }
 
 impl Scan<u16> for CreatureScaner {
-    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn ToLua<ID = u16>>> {
+    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn Output<ID = u16>>> {
         let mut buf = Vec::new();
         let mut reader = Reader::from_str(entity);
         reader.trim_text(true);

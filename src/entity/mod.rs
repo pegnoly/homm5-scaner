@@ -26,13 +26,14 @@ pub trait CollectFiles {
 }
 
 pub trait Scan<T> {
-    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn ToLua<ID = T>>>;
+    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn Output<ID = T>>>;
     fn get_id(&self) -> Option<T>;
 }
 
-pub trait ToLua {
+pub trait Output {
     type ID;
     fn to_lua(&self, id: Option<Self::ID>) -> String;
+    fn to_json(&self) -> String;
 }
 
 pub struct ScanProcessor<T> {
@@ -54,24 +55,27 @@ impl<T> ScanProcessor<T> {
 }
 
 impl<T> ScanProcessor<T> {
-    pub fn run(&mut self, files: &HashMap<String, FileStructure>) -> String {
+    pub fn run(&mut self, files: &HashMap<String, FileStructure>) -> (String, String) {
         let mut actual_files = vec![];
         self.collector.collect(files, &mut actual_files);
         println!("files collected: {:?}", &actual_files);
         let mut output_string = format!("{} = {{\n", &self.table_name);
+        let mut json_string = String::from("[");
         for file in actual_files {
             let scanned_file = self.scaner.scan(&file.0, &file.1.content, files);
             let id = self.scaner.get_id();
             match scanned_file {
                 Some(actual_file) => {
                     output_string += &actual_file.to_lua(id);
+                    json_string += &format!("{},\n", actual_file.to_json());
                 },
                 None => {}
             }
         }
         output_string.trim_end_matches(",").to_string();
         output_string.push('}');
-        output_string
+        json_string.trim_end_matches(",").to_owned();
+        (output_string, json_string)
     }
 }
 

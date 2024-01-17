@@ -1,10 +1,10 @@
 use serde::{Serialize, Deserialize};
-use super::{Scan, ToLua, FileStructure, CollectFiles};
+use super::{Scan, Output, FileStructure, CollectFiles};
 use quick_xml::{Reader, events::Event};
 use std::collections::HashMap;
 use homm5_types::art::AdvMapArtifactShared;
 
-impl ToLua for AdvMapArtifactShared {
+impl Output for AdvMapArtifactShared {
     type ID = u16;
 
     fn to_lua(&self, id: Option<Self::ID>) -> String {
@@ -28,6 +28,10 @@ impl ToLua for AdvMapArtifactShared {
             self.Slot,
             self.Type
         )
+    }
+
+    fn to_json(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
     }
 }
 
@@ -92,7 +96,7 @@ impl Scan<u16> for ArtScaner {
     }
 
     #[allow(unused_variables)]
-    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn ToLua<ID = u16>>> {
+    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn Output<ID = u16>>> {
         let art_de: Result<AdvMapArtifactShared, quick_xml::DeError> = quick_xml::de::from_str(entity);
         match art_de {
             Ok(art) => {

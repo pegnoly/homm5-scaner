@@ -1,12 +1,12 @@
 use crate::{
-    entity::{Scan, ToLua, configure_path, CollectFiles},
+    entity::{Scan, Output, configure_path, CollectFiles},
     pak::FileStructure
 };
 use quick_xml::{Reader, events::Event};
 use std::collections::HashMap;
 use homm5_types::{common::FileRef, hero::AdvMapHeroShared};
 
-impl ToLua for AdvMapHeroShared {
+impl Output for AdvMapHeroShared {
     type ID = String;
     fn to_lua(&self, _id: Option<String>) -> String {
         let is_scenario_lua = if self.ScenarioHero == true {"1"} else {"nil"};
@@ -36,6 +36,10 @@ impl ToLua for AdvMapHeroShared {
             self.Editable.BiographyFileRef.as_ref().unwrap().href.as_ref().unwrap_or(&String::new())
         )
     }
+
+    fn to_json(&self) -> String {
+        serde_json::to_string_pretty(self).unwrap()
+    }
 }
 
 pub struct HeroFileCollector {}
@@ -55,7 +59,7 @@ impl CollectFiles for HeroFileCollector {
 pub struct HeroScaner {}
 
 impl Scan<String> for HeroScaner {
-    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn ToLua<ID = String>>> {
+    fn scan(&mut self, file_key: &String, entity: &String, files: &HashMap<String, FileStructure>) -> Option<Box<dyn Output<ID = String>>> {
         let mut buf = Vec::new();
         let mut reader = Reader::from_str(entity);
         reader.trim_text(true);
@@ -109,4 +113,5 @@ impl Scan<String> for HeroScaner {
     fn get_id(&self) -> Option<String> {
         None
     }
+
 }
