@@ -74,7 +74,7 @@ impl<T> ScanProcessor<T> {
         }
         output_string.trim_end_matches(",").to_string();
         output_string.push('}');
-        json_string.trim_end_matches(",").to_owned();
+        json_string = json_string.trim_end_matches(",").to_owned();
         (output_string, json_string)
     }
 }

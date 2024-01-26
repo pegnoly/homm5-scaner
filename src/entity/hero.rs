@@ -81,8 +81,18 @@ impl Scan<String> for HeroScaner {
                                         Ok(mut hero) => {
                                             let spec_name = configure_path(hero.SpecializationNameFileRef.as_ref().unwrap().href.as_ref(), file_key, files);
                                             let spec_desc = configure_path(hero.SpecializationDescFileRef.as_ref().unwrap().href.as_ref(), file_key, files);
-                                            let spec_icon = configure_path(hero.SpecializationIcon.as_ref().unwrap().href.as_ref(), file_key, files);
-                                            let icon = configure_path(hero.FaceTexture.as_ref().unwrap().href.as_ref(), file_key, files);
+                                            let spec_icon = configure_path(
+                                                Some(&hero.SpecializationIcon.as_ref().unwrap().href.as_ref()
+                                                    .unwrap_or(&String::new()).replace("#xpointer(/Texture)", "")), 
+                                                    file_key, 
+                                                    files
+                                            );
+                                            let icon = configure_path(
+                                                Some(&hero.FaceTexture.as_ref().unwrap().href.as_ref()
+                                                .unwrap_or(&String::new()).replace("#xpointer(/Texture)", "")), 
+                                                file_key, 
+                                                files
+                                            );
                                             let name = configure_path(hero.Editable.NameFileRef.as_ref().unwrap().href.as_ref(), file_key, files);
                                             let bio = configure_path(hero.Editable.BiographyFileRef.as_ref().unwrap().href.as_ref(), file_key, files);
                                             hero.SpecializationNameFileRef = Some(FileRef { href: Some(spec_name) });
